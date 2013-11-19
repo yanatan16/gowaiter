@@ -57,8 +57,9 @@ func (w Waiter) Wait() error {
 func (w Waiter) Wrap(err error) {
 	if err != nil {
 		w.Errors <- err
+	} else {
+		w.Done <- true
 	}
-	w.Done <- true
 }
 
 func (w Waiter) Close(closer io.Closer) {
@@ -66,7 +67,7 @@ func (w Waiter) Close(closer io.Closer) {
 		if isNotNil(closer) {
 			w.Wrap(closer.Close())
 		} else {
-			w.Wrap(nil)
+			w.Done <- true
 		}
 	}()
 }

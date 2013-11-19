@@ -81,6 +81,15 @@ func TestNilCase(t *testing.T) {
 	}
 }
 
+func TestCloseNil(t *testing.T) {
+	w := New(1)
+	var c1 *T
+	w.Close(c1)
+	if err := w.Wait(); err != nil {
+		t.Error(err)
+	}
+}
+
 func TestReturnTime(t *testing.T) {
 	w := New(2)
 	begin := time.Now()
