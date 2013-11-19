@@ -26,8 +26,8 @@
 package waiter
 
 import (
-	"reflect"
 	"io"
+	"reflect"
 )
 
 type Waiter struct {
