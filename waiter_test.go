@@ -140,3 +140,26 @@ func TestErrorReturnTime(t *testing.T) {
 		t.Error("Time took too long", time.Now().Sub(begin))
 	}
 }
+
+func TestTimeout(t *testing.T) {
+	w := New(1)
+	begin := time.Now()
+	if err := w.WaitTimeout(50 * time.Millisecond); err == nil {
+		t.Error("Error is not timeout?")
+	}
+	if time.Now().Sub(begin) < 50*time.Millisecond {
+		t.Error("Timeout took too short!")
+	}
+}
+
+func TestTimeout2(t *testing.T) {
+	w := New(1)
+	begin := time.Now()
+	w.Close(nil)
+	if err := w.WaitTimeout(50 * time.Millisecond); err != nil {
+		t.Error("Error shouldn't be returned", err)
+	}
+	if time.Now().Sub(begin) > 50*time.Millisecond {
+		t.Error("Shouldn't have waited until timeout!")
+	}
+}

@@ -26,8 +26,10 @@
 package waiter
 
 import (
+	"errors"
 	"io"
 	"reflect"
+	"time"
 )
 
 type Waiter struct {
@@ -41,17 +43,30 @@ func New(cnt int) *Waiter {
 }
 
 func (w Waiter) Wait() error {
+	return w.WaitTimeout(0)
+}
+
+func (w Waiter) WaitTimeout(timeout time.Duration) error {
+	var timer <-chan time.Time
+	if timeout > 0 {
+		timer = time.After(timeout)
+	}
+
 	for i := 0; i < w.Count; i++ {
 		select {
 		case err := <-w.Errors:
 			w.waitAndClose(i)
 			return err
+		case <-timer:
+			w.waitAndClose(i)
+			return errors.New("Waiter Timeout")
 		case <-w.Done:
 		}
 	}
 	close(w.Errors)
 	close(w.Done)
 	return nil
+
 }
 
 func (w Waiter) Wrap(err error) {
@@ -94,9 +109,11 @@ func (w Waiter) waitAndClose(i int) {
 }
 
 func isNotNil(i interface{}) bool {
-	if reflect.TypeOf(i).Kind() == reflect.Ptr {
-		return reflect.ValueOf(i).Pointer() != 0
-	} else {
-		return i != nil
+	if i != nil {
+		if reflect.TypeOf(i).Kind() == reflect.Ptr {
+			return reflect.ValueOf(i).Pointer() != 0
+		}
+		return true
 	}
+	return false
 }
