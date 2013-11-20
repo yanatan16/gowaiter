@@ -56,6 +56,18 @@ func TestCloser(t *testing.T) {
 	}
 }
 
+func TestBypass(t *testing.T) {
+
+	w := New(2)
+
+	w.Close(T(true))
+	w.Bypass()
+
+	if err := w.Wait(); err != nil {
+		t.Error(err)
+	}
+}
+
 func TestMultipleErrors(t *testing.T) {
 	w := New(2)
 

@@ -72,6 +72,11 @@ func (w Waiter) Close(closer io.Closer) {
 	}()
 }
 
+// Bypass a single wait. That is, we decrement count.
+func (w *Waiter) Bypass() {
+	w.Count -= 1
+}
+
 // After an error we return from wait, but must ensure Done and Errors are properly closed
 func (w Waiter) waitAndClose(i int) {
 	go func() {
